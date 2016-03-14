@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SimpleUI</string>
+
+    <string name="blackTea">Black Tea</string>
+    <string name="coffee">Coffee</string>
+    <string name="milk">Milk</string>
+    <string name="water">Water</string>
 </resources>

@@ -1,9 +1,11 @@
 package com.example.simpleui.simpleui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_MENU_ACTIVITY = 0;
 
     TextView textView;
     EditText editText;
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("debug", "main menu onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -117,5 +121,69 @@ public class MainActivity extends AppCompatActivity {
         editText.setText("");
         textView.setText(text);
 
+    }
+
+    public void goToMenu(View view){
+        //方法一
+        Intent intent = new Intent(this, DrinkMenuAvtivity.class);
+
+        //方法二
+//        Intent intent = new Intent(MainActivity.this, DrinkMenuAvtivity.class);
+
+
+        //方法三
+//        Intent intent = new Intent();
+//        intent.setClass(this, DrinkMenuAvtivity.class);
+
+        //startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_MENU_ACTIVITY);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("debug", "main menu onActivityResult");
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_CODE_MENU_ACTIVITY){
+            if(resultCode == RESULT_OK){
+                textView.setText(data.getStringExtra("result"));
+            }
+        }
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        Log.d("debug", "main menu onStart");
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        Log.d("debug", "main menu onResume");
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.d("debug", "main menu onPause");
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        Log.d("debug", "main menu onStop");
+    }
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+        Log.d("debug", "main menu onRestart");
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        Log.d("debug", "main menu onDestroy");
     }
 }
