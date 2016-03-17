@@ -6,6 +6,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DrinkMenuAvtivity extends AppCompatActivity {
 
@@ -30,8 +36,12 @@ public class DrinkMenuAvtivity extends AppCompatActivity {
 
     public void done(View view){
         Intent data = new Intent();
-        data.putExtra("result","order done");
-        setResult(RESULT_OK, data);
+        JSONArray array = this.getData();
+
+        //data.putExtra("result","order done");
+
+        data.putExtra("result", array.toString());
+        this.setResult(RESULT_OK, data);
 
         Log.d("debug", "main menu done before");
         finish();   //不要這個頁面
@@ -72,5 +82,38 @@ public class DrinkMenuAvtivity extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
         Log.d("debug", "drink menu onDestroy");
+    }
+
+    public JSONArray getData(){
+        LinearLayout rootLinearLayout = (LinearLayout) findViewById(R.id.root);
+
+        int count = rootLinearLayout.getChildCount();
+
+        JSONArray array = new JSONArray();
+
+        // 限制count-1，是因為不需拿最後一個LinearLayout物件
+        for(int i=0; i<count-1; i++){
+            LinearLayout linearLayout = (LinearLayout) rootLinearLayout.getChildAt(i);
+            TextView drinkNameTextView = (TextView) linearLayout.getChildAt(0);
+            Button lButton = (Button) linearLayout.getChildAt(1);
+            Button mButton = (Button) linearLayout.getChildAt(2);
+
+            String drinkName = drinkNameTextView.getText().toString();
+            int lNumber = Integer.parseInt(lButton.getText().toString());
+            int mNumber = Integer.parseInt(mButton.getText().toString());
+
+            JSONObject object = new JSONObject();
+            try {
+                object.put("name", drinkName);
+                object.put("lNumber", lNumber);
+                object.put("mNumber", mNumber);
+
+                array.put(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return array;
     }
 }
