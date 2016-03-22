@@ -45,7 +45,7 @@ public class DrinkMenuAvtivity extends AppCompatActivity {
         data.putExtra("result", array.toString());
 
         //回傳總訂單杯數
-        data.putExtra("drinkNumber", this.countTotalCups());
+//        data.putExtra("drinkNumber", this.countTotalCups());
 
         this.setResult(RESULT_OK, data);
 
@@ -54,29 +54,29 @@ public class DrinkMenuAvtivity extends AppCompatActivity {
         Log.d("debug", "main menu done after");
     }
 
-    private int countTotalCups(){
-        int lNumber, mNumber;
-        JSONArray array;
-
-        lNumber = 0;
-        mNumber = 0;
-        array = this.getData();
-
-        for (int i = 0 ; i < array.length(); i++) {
-            JSONObject obj = null;
-
-            try {
-                obj = array.getJSONObject(i);
-                lNumber += obj.getInt("lNumber");
-                mNumber += obj.getInt("mNumber");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-//        Log.d("總杯數：", Integer.toString(mNumber + lNumber));
-
-        return mNumber + lNumber;
-    }
+//    private int countTotalCups(){
+//        int lNumber, mNumber;
+//        JSONArray array;
+//
+//        lNumber = 0;
+//        mNumber = 0;
+//        array = this.getData();
+//
+//        for (int i = 0 ; i < array.length(); i++) {
+//            JSONObject obj = null;
+//
+//            try {
+//                obj = array.getJSONObject(i);
+//                lNumber += obj.getInt("lNumber");
+//                mNumber += obj.getInt("mNumber");
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+////        Log.d("總杯數：", Integer.toString(mNumber + lNumber));
+//
+//        return mNumber + lNumber;
+//    }
 
     @Override
     protected void onStart(){

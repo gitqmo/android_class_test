@@ -63,23 +63,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        Log.d("DebugMode", "main menu onCreate");
+        Log.d("DebugMode", "main menu onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView = (TextView)findViewById(R.id.textView);
-        editText = (EditText)findViewById(R.id.editText);
-        hideCheckBox = (CheckBox)findViewById(R.id.checkBox);
+        this.textView = (TextView)findViewById(R.id.textView);
+        this.editText = (EditText)findViewById(R.id.editText);
+        this.hideCheckBox = (CheckBox)findViewById(R.id.checkBox);
 
-        sp = getSharedPreferences("setting", Context.MODE_PRIVATE); // 定義setting裡面的東西，供之後使用
-        editor = sp.edit();
-        listView = (ListView) findViewById(R.id.listView);
-        spinner = (Spinner) findViewById(R.id.spinner);
-        photoView = (ImageView) findViewById(R.id.imageView);
+        this.sp = getSharedPreferences("setting", Context.MODE_PRIVATE); // 定義setting裡面的東西，供之後使用
+        this.editor = sp.edit();
+        this.listView = (ListView) findViewById(R.id.listView);
+        this.spinner = (Spinner) findViewById(R.id.spinner);
+        this.photoView = (ImageView) findViewById(R.id.imageView);
 
-        editText.setText(sp.getString("editText", ""));             // 取出sp裡面editText的內容，存回到editText
+        this.editText.setText(sp.getString("editText", ""));             // 取出sp裡面editText的內容，存回到editText
 
-        editText.setOnKeyListener(new View.OnKeyListener() {
+        this.editText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 editor.putString("editText", editText.getText().toString());//把所key入的內容寫入到editText裡面，然後存起來
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {       // 設定可以偵測虛擬鍵盤的輸入
+        this.editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {       // 設定可以偵測虛擬鍵盤的輸入
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -106,15 +106,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //抓取畫面上hidecheckbox物件的值，如果有被勾選就帶入true，如果沒有勾選就是預設為false，再存回sp裡面的hidecheckbox
-        hideCheckBox.setChecked(sp.getBoolean("hideCheckbox", false));
+        this.hideCheckBox.setChecked(sp.getBoolean("hideCheckbox", false));
 
-        hideCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        this.hideCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 editor.putBoolean("hideCheckbox", hideCheckBox.isChecked());
                 editor.apply();
             }
         });
+
+//        this.setListView();
+//        this.setSpinner();
+
+        this.setHistory();
+        this.setStoreInfos();
 
         ParseObject testObject;
         //testObject = new ParseObject("TestObject");
@@ -152,14 +158,31 @@ public class MainActivity extends AppCompatActivity {
                 List<Map<String, String>> data = new ArrayList<>();
                 for(int i=0; i<queryResults.size(); i++){
                     ParseObject object = queryResults.get(i);
-                    String note = object.getString("note");
-                    String storeInfo = object.getString("storeInfo");
-//                    String menu = object.getString("menu");
+                    String note, storeInfo, menu;
+
+                    note = object.getString("note");
+                    storeInfo = object.getString("storeInfo");
+                    menu = null;
+//                    menu = object.getString("menu");
+//                    menu = Integer.toString(countTotalCups(object.getJSONObject("menu")));
+                    try {
+                        menu = Integer.toString(countTotalCups(new JSONArray(object.getString("menu"))));
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
+
+//                    if(menu == null){
+//                        Log.d("DebugMode：", "menu is null.");
+//                    }{
+//                        Log.d("DebugMode：", "menu is not null.");
+//                    }
+
 
                     Map<String, String> item = new HashMap<>();
                     item.put("note", note);
                     item.put("storeInfo", storeInfo);
-                    item.put("drinkNumber", Integer.toString(menuCupsCount));
+//                    item.put("drinkNumber", Integer.toString(menuCupsCount));
+                    item.put("drinkNumber", menu);
 //                    Log.d(i + "DebugMode 總杯數：", Integer.toString(menuCupsCount));
 
                     data.add(item);
@@ -176,6 +199,61 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d("DebugMode總杯數done end：", "Bye Bye!!!");
             }
         });
+    }
+
+//    private int countTotalCups(JSONObject jsonObject){
+//        int lNumber, mNumber;
+//
+//        lNumber = 0;
+//        mNumber = 0;
+//        if(jsonObject != null){
+//            Log.d("DebugMode：", "jsonObject is not null.");
+//            try {
+//                lNumber += jsonObject.getInt("lNumber");
+//                mNumber += jsonObject.getInt("mNumber");
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        Log.d("DebugMode：", "jsonObject is null.");
+//
+//        Log.d("總杯數：", Integer.toString(mNumber + lNumber));
+//
+//        return mNumber + lNumber;
+//    }
+
+    private int countTotalCups(JSONArray jsonArray){
+        int lNumber, mNumber;
+
+        lNumber = 0;
+        mNumber = 0;
+//        if(jsonArray != null){
+//            Log.d("DebugMode：", "jsonArray is not null.");
+            for (int i = 0 ; i < jsonArray.length(); i++) {
+                JSONObject obj = null;
+                try {
+                    obj = jsonArray.getJSONObject(i);
+
+                    lNumber += obj.getInt("lNumber");
+                    mNumber += obj.getInt("mNumber");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    obj = jsonArray.getJSONObject(i);
+
+                    lNumber += obj.getInt("l");
+                    mNumber += obj.getInt("m");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+//        }
+//        Log.d("DebugMode：", "jsonArray is null.");
+        Log.d("DebugMode總杯數", Integer.toString(mNumber + lNumber));
+
+        return mNumber + lNumber;
     }
 
 //    public void setListView(){
@@ -279,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
                 this.getMenuResultDescription(data);
 
                 //接收來自DrinkMenuActivity中回傳的訂單總杯數
-                this.menuCupsCount = data.getIntExtra("drinkNumber", 0);
+//                this.menuCupsCount = data.getIntExtra("drinkNumber", 0);
 //                Log.d("DebugMode 總杯數：", Integer.toString(this.menuCupsCount));
             }
         }else if(requestCode == REQUEST_CODE_CAMERA){
@@ -325,12 +403,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart(){
         super.onStart();
         Log.d("DebugMode", "main menu onStart");
-
-//        this.setListView();
-//        this.setSpinner();
-
-        this.setHistory();
-        this.setStoreInfos();
     }
 
     @Override
