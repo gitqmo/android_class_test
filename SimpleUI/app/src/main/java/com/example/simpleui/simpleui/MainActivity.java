@@ -57,12 +57,13 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;
     ImageView photoView;
 
-    String menuResult = "";
+    String menuResult = "";             // 取得總訂單資料描述
+    int menuCupsCount = 0;              // 取得總訂單杯數
     List<ParseObject> queryResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("debug", "main menu onCreate");
+//        Log.d("DebugMode", "main menu onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -115,12 +116,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        this.setListView();
-//        this.setSpinner();
-
-        this.setHistory();
-        this.setStoreInfos();
-
         ParseObject testObject;
         //testObject = new ParseObject("TestObject");
         testObject = new ParseObject("HomeworkParse");
@@ -146,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
+//                Log.d("DebugMode總杯數done start：", "GOGOGO!!!");
+
                 if(e != null){
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     return;
@@ -157,12 +154,13 @@ public class MainActivity extends AppCompatActivity {
                     ParseObject object = queryResults.get(i);
                     String note = object.getString("note");
                     String storeInfo = object.getString("storeInfo");
-                    String menu = object.getString("menu");
+//                    String menu = object.getString("menu");
 
                     Map<String, String> item = new HashMap<>();
                     item.put("note", note);
                     item.put("storeInfo", storeInfo);
-                    item.put("drinkNumber", "15");
+                    item.put("drinkNumber", Integer.toString(menuCupsCount));
+//                    Log.d(i + "DebugMode 總杯數：", Integer.toString(menuCupsCount));
 
                     data.add(item);
                 }
@@ -175,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
                 listView.setAdapter(simpleAdapter);
 
+//                Log.d("DebugMode總杯數done end：", "Bye Bye!!!");
             }
         });
     }
@@ -197,13 +196,13 @@ public class MainActivity extends AppCompatActivity {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
-                if(e != null){
+                if (e != null) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     return;
                 }
 
                 String[] stores = new String[list.size()];
-                for(int i=0; i<list.size();i++){
+                for (int i = 0; i < list.size(); i++) {
                     ParseObject object = list.get(i);
                     stores[i] = object.getString("name") + ", " + object.getString("address");
                 }
@@ -271,88 +270,109 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("debug", "main menu onActivityResult");
+//        Log.d("DebugMode", "main menu onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == REQUEST_CODE_MENU_ACTIVITY){
             if(resultCode == RESULT_OK){
-                JSONArray array;
+                //處理從DrinkMenuActivity中回傳的一筆訂單資料描述
+                this.getMenuResultDescription(data);
 
-                menuResult = data.getStringExtra("result");
-                try {
-                    String text = "";
-                    array = new JSONArray(menuResult);
-                    for(int i=0; i<array.length(); i++){
-                        String name, lNumber, mNumber;
-                        JSONObject order = array.getJSONObject(i);
-
-                        name = order.getString("name");
-                        lNumber = String.valueOf(order.getString("lNumber"));
-                        mNumber = String.valueOf(order.getString("mNumber"));
-
-                        text += name+ "大杯："+ lNumber+ "、中杯："+ mNumber+ "\n";
-                    }
-
-                    textView.setText(text);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                //textView.setText(data.getStringExtra("result"));
+                //接收來自DrinkMenuActivity中回傳的訂單總杯數
+                this.menuCupsCount = data.getIntExtra("drinkNumber", 0);
+//                Log.d("DebugMode 總杯數：", Integer.toString(this.menuCupsCount));
             }
         }else if(requestCode == REQUEST_CODE_CAMERA){
             if(resultCode == RESULT_OK){
-                Log.d("Camera Result:", "OK1");
+//                Log.d("Camera Result:", "OK1");
                 photoView.setImageURI(Utils.getPhotoUri());
-                Log.d("Camera Result:", "OK2");
+//                Log.d("Camera Result:", "OK2");
             }
         }
+    }
+
+    /**
+     * 處理從DrinkMenuActivity中回傳的一筆訂單資料描述
+     * @param data
+     */
+    private void getMenuResultDescription(Intent data){
+        JSONArray array;
+
+        this.menuResult = data.getStringExtra("result");
+        try {
+            String text = "";
+            array = new JSONArray(menuResult);
+            for(int i=0; i<array.length(); i++){
+                String name, lNumber, mNumber;
+                JSONObject order = array.getJSONObject(i);
+
+                name = order.getString("name");
+                lNumber = String.valueOf(order.getString("lNumber"));
+                mNumber = String.valueOf(order.getString("mNumber"));
+
+                text += name+ "大杯："+ lNumber+ "、中杯："+ mNumber+ "\n";
+            }
+
+            textView.setText(text);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //textView.setText(data.getStringExtra("result"));
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-        Log.d("debug", "main menu onStart");
+        Log.d("DebugMode", "main menu onStart");
+
+//        this.setListView();
+//        this.setSpinner();
+
+        this.setHistory();
+        this.setStoreInfos();
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        Log.d("debug", "main menu onResume");
+        Log.d("DebugMode", "main menu onResume");
     }
 
     @Override
     protected void onPause(){
         super.onPause();
-        Log.d("debug", "main menu onPause");
+        Log.d("DebugMode", "main menu onPause");
     }
 
     @Override
     protected void onStop(){
         super.onStop();
-        Log.d("debug", "main menu onStop");
+        Log.d("DebugMode", "main menu onStop");
     }
 
     @Override
     protected void onRestart(){
         super.onRestart();
-        Log.d("debug", "main menu onRestart");
+        Log.d("DebugMode", "main menu onRestart");
     }
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        Log.d("debug", "main menu onDestroy");
+        Log.d("DebugMode", "main menu onDestroy");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d("DebugMode", "main menu onCreateOptionsMenu");
         this.getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d("DebugMode", "main menu onOptionsItemSelected");
         int id = item.getItemId();
 
         if(id == R.id.action_take_photo){
