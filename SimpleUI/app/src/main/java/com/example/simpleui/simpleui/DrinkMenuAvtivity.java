@@ -41,6 +41,7 @@ public class DrinkMenuAvtivity extends AppCompatActivity {
         //data.putExtra("result","order done");
 
         data.putExtra("result", array.toString());
+//        data.putExtra("drinkNumber", array);
         this.setResult(RESULT_OK, data);
 
         Log.d("debug", "main menu done before");
