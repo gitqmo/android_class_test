@@ -44,39 +44,12 @@ public class DrinkMenuAvtivity extends AppCompatActivity {
         //回傳總訂單資料描述
         data.putExtra("result", array.toString());
 
-        //回傳總訂單杯數
-//        data.putExtra("drinkNumber", this.countTotalCups());
-
         this.setResult(RESULT_OK, data);
 
         Log.d("debug", "main menu done before");
         finish();   //不要這個頁面
         Log.d("debug", "main menu done after");
     }
-
-//    private int countTotalCups(){
-//        int lNumber, mNumber;
-//        JSONArray array;
-//
-//        lNumber = 0;
-//        mNumber = 0;
-//        array = this.getData();
-//
-//        for (int i = 0 ; i < array.length(); i++) {
-//            JSONObject obj = null;
-//
-//            try {
-//                obj = array.getJSONObject(i);
-//                lNumber += obj.getInt("lNumber");
-//                mNumber += obj.getInt("mNumber");
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
-////        Log.d("總杯數：", Integer.toString(mNumber + lNumber));
-//
-//        return mNumber + lNumber;
-//    }
 
     @Override
     protected void onStart(){

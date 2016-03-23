@@ -39,6 +39,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.Manifest;
@@ -118,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
 //        this.setListView();
 //        this.setSpinner();
-
         this.setHistory();
         this.setStoreInfos();
 
@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
-//                Log.d("DebugMode總杯數done start：", "GOGOGO!!!");
 
                 if(e != null){
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -157,33 +156,25 @@ public class MainActivity extends AppCompatActivity {
                 queryResults = list;
                 List<Map<String, String>> data = new ArrayList<>();
                 for(int i=0; i<queryResults.size(); i++){
-                    ParseObject object = queryResults.get(i);
+                    ParseObject object;
                     String note, storeInfo, menu;
+
+                    object = queryResults.get(i);
 
                     note = object.getString("note");
                     storeInfo = object.getString("storeInfo");
                     menu = null;
 //                    menu = object.getString("menu");
-//                    menu = Integer.toString(countTotalCups(object.getJSONObject("menu")));
                     try {
-                        menu = Integer.toString(countTotalCups(new JSONArray(object.getString("menu"))));
+                        menu = Integer.toString(countTotalCupsInHistory(new JSONArray(object.getString("menu"))));
                     } catch (JSONException e1) {
                         e1.printStackTrace();
                     }
 
-//                    if(menu == null){
-//                        Log.d("DebugMode：", "menu is null.");
-//                    }{
-//                        Log.d("DebugMode：", "menu is not null.");
-//                    }
-
-
                     Map<String, String> item = new HashMap<>();
                     item.put("note", note);
                     item.put("storeInfo", storeInfo);
-//                    item.put("drinkNumber", Integer.toString(menuCupsCount));
                     item.put("drinkNumber", menu);
-//                    Log.d(i + "DebugMode 總杯數：", Integer.toString(menuCupsCount));
 
                     data.add(item);
                 }
@@ -195,65 +186,54 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this, data, R.layout.listview_item, from, to);
 
                 listView.setAdapter(simpleAdapter);
-
-//                Log.d("DebugMode總杯數done end：", "Bye Bye!!!");
             }
         });
     }
 
-//    private int countTotalCups(JSONObject jsonObject){
-//        int lNumber, mNumber;
-//
-//        lNumber = 0;
-//        mNumber = 0;
-//        if(jsonObject != null){
-//            Log.d("DebugMode：", "jsonObject is not null.");
-//            try {
-//                lNumber += jsonObject.getInt("lNumber");
-//                mNumber += jsonObject.getInt("mNumber");
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        Log.d("DebugMode：", "jsonObject is null.");
-//
-//        Log.d("總杯數：", Integer.toString(mNumber + lNumber));
-//
-//        return mNumber + lNumber;
-//    }
+    /**
+     * 統計歷次訂單的杯數
+     * @param jsonArray
+     * @return
+     */
+    private int countTotalCupsInHistory(JSONArray jsonArray){
+        int total;
 
-    private int countTotalCups(JSONArray jsonArray){
-        int lNumber, mNumber;
+        total = 0;
+        for (int i = 0 ; i < jsonArray.length(); i++) {
+            try {
+                total += this.countTotalCupsPerOrder(jsonArray.getJSONObject(i));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return total;
+    }
 
-        lNumber = 0;
-        mNumber = 0;
-//        if(jsonArray != null){
-//            Log.d("DebugMode：", "jsonArray is not null.");
-            for (int i = 0 ; i < jsonArray.length(); i++) {
-                JSONObject obj = null;
-                try {
-                    obj = jsonArray.getJSONObject(i);
+    /**
+     * 統計每筆訂單的總數
+     * @param jsonObject
+     * @return
+     */
+    private int countTotalCupsPerOrder(JSONObject jsonObject){
+        int total;
 
-                    lNumber += obj.getInt("lNumber");
-                    mNumber += obj.getInt("mNumber");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        total = 0;
+        Iterator<String> key;
+        try {
+            key = jsonObject.keys();
 
-                try {
-                    obj = jsonArray.getJSONObject(i);
+            while(key.hasNext()){
+                String jsonKey;
 
-                    lNumber += obj.getInt("l");
-                    mNumber += obj.getInt("m");
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                jsonKey = key.next();
+                if(!jsonKey.equals("name")){
+                    total += jsonObject.getInt(jsonKey);
                 }
             }
-//        }
-//        Log.d("DebugMode：", "jsonArray is null.");
-        Log.d("DebugMode總杯數", Integer.toString(mNumber + lNumber));
-
-        return mNumber + lNumber;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return total;
     }
 
 //    public void setListView(){
