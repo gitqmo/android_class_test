@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!--課堂Parse的Key-->
+        <!-- 課堂Parse的Key -->
         <meta-data
             android:name="com.parse.APPLICATION_ID"
             android:value="XcUmvcSIMJefbmJDFcidLC6mNBQEAaGHYiGPSYAS" />
@@ -22,7 +22,7 @@
             android:name="com.parse.CLIENT_KEY"
             android:value="DnZ3ggXI55eF8ypD5bps3eBYQ0qAFCHehre5Wu6a" />
 
-        <!--作業Parse的Key-->
+        <!-- 作業Parse的Key -->
         <!--
         <meta-data
             android:name="com.parse.APPLICATION_ID"
@@ -39,7 +39,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DrinkMenuAvtivity"></activity>
+        <activity android:name=".DrinkMenuAvtivity" />
+        <activity android:name=".OrderDetailActivity"></activity>
     </application>
 
 </manifest>

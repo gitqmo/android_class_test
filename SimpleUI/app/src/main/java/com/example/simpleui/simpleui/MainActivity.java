@@ -1,5 +1,6 @@
 package com.example.simpleui.simpleui;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,12 +16,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -65,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
     String menuResult = "";             // 取得總訂單資料描述
     List<ParseObject> queryResults;
+    ProgressDialog progressDialog;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +84,14 @@ public class MainActivity extends AppCompatActivity {
         this.sp = getSharedPreferences("setting", Context.MODE_PRIVATE); // 定義setting裡面的東西，供之後使用
         this.editor = sp.edit();
         this.listView = (ListView) findViewById(R.id.listView);
+        this.listView.setVisibility(View.GONE);
+        this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                gotToDetailOrder(position);
+            }
+        });
+
         this.spinner = (Spinner) findViewById(R.id.spinner);
         this.photoView = (ImageView) findViewById(R.id.imageView);
 
@@ -119,17 +132,22 @@ public class MainActivity extends AppCompatActivity {
                 editor.putBoolean("hideCheckbox", hideCheckBox.isChecked());
                 editor.apply();
 
-                if(isChecked){
+                if (isChecked) {
                     photoView.setVisibility(View.GONE);
-                }else{
+                } else {
                     photoView.setVisibility(View.VISIBLE);
                 }
             }
         });
 
+        progressDialog = new ProgressDialog(this);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
 //        this.setListView();
 //        this.setSpinner();
+
         this.setHistory();
+
         this.setStoreInfos();
 
         ParseObject testObject;
@@ -158,14 +176,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
 
-                if(e != null){
+                if (e != null) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    progressBar.setVisibility(View.GONE);
                     return;
                 }
 
                 queryResults = list;
                 List<Map<String, String>> data = new ArrayList<>();
-                for(int i=0; i<queryResults.size(); i++){
+                for (int i = 0; i < queryResults.size(); i++) {
                     ParseObject object;
                     String note, storeInfo, menu;
 
@@ -193,9 +212,11 @@ public class MainActivity extends AppCompatActivity {
                 int[] to = {R.id.note, R.id.storeInfo, R.id.drinkNumber};
 
                 SimpleAdapter simpleAdapter = new SimpleAdapter(
-                    MainActivity.this, data, R.layout.listview_item, from, to);
+                        MainActivity.this, data, R.layout.listview_item, from, to);
 
                 listView.setAdapter(simpleAdapter);
+                listView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -303,19 +324,23 @@ public class MainActivity extends AppCompatActivity {
             orderObject.put("photo",file);
         }
 
+        progressDialog.setTitle("Loading...");
+        progressDialog.show();
+
         orderObject.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
+                progressDialog.dismiss();
                 if (e == null) {
                     Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Submit Fail", Toast.LENGTH_LONG).show();
                     hasPhoto = false;
                     photoView.setImageResource(0);
 
                     editText.setText("");
                     textView.setText("");
                     setHistory();
+                } else {
+                    Toast.makeText(MainActivity.this, "Submit Fail", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -480,5 +505,23 @@ public class MainActivity extends AppCompatActivity {
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Utils.getPhotoUri());
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
+    }
+
+    private void gotToDetailOrder(int posotion){
+        Intent intent = new Intent();
+        ParseObject object = queryResults.get(posotion);
+
+        intent.setClass(this, OrderDetailActivity.class);
+
+        intent.putExtra("note", object.getString("note"));
+        intent.putExtra("storeInfo", object.getString("storeInfo"));
+        intent.putExtra("menu", object.getString("menu"));
+
+        if(object.getParseFile("photo") != null)
+        {
+            intent.putExtra("photoURL", object.getParseFile("photo").getUrl());
+        }
+
+        startActivity(intent);
     }
 }
