@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
@@ -43,10 +45,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.Manifest;
+//import java.util.jar.Manifest;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_MENU_ACTIVITY = 0;
     private static final int REQUEST_CODE_CAMERA = 1;
+
+    private boolean hasPhoto = false;
 
     TextView textView;
     EditText editText;
@@ -59,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
     ImageView photoView;
 
     String menuResult = "";             // 取得總訂單資料描述
-    int menuCupsCount = 0;              // 取得總訂單杯數
     List<ParseObject> queryResults;
 
     @Override
@@ -114,6 +118,12 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 editor.putBoolean("hideCheckbox", hideCheckBox.isChecked());
                 editor.apply();
+
+                if(isChecked){
+                    photoView.setVisibility(View.GONE);
+                }else{
+                    photoView.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -223,11 +233,11 @@ public class MainActivity extends AppCompatActivity {
             key = jsonObject.keys();
 
             while(key.hasNext()){
-                String jsonKey;
+                String tempKey;
 
-                jsonKey = key.next();
-                if(!jsonKey.equals("name")){
-                    total += jsonObject.getInt(jsonKey);
+                tempKey = key.next();
+                if(!tempKey.equals("name")){
+                    total += jsonObject.getInt(tempKey);
                 }
             }
         } catch (JSONException e) {
@@ -235,6 +245,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return total;
     }
+
+    Object o;
 
 //    public void setListView(){
 //        String[] data = Utils.readFile(this, "history.txt").split("\n");
@@ -284,29 +296,44 @@ public class MainActivity extends AppCompatActivity {
         orderObject.put("storeInfo", spinner.getSelectedItem());
         orderObject.put("menu", menuResult);
 
+        if(this.hasPhoto){
+            Uri uri = Utils.getPhotoUri();
+            ParseFile file = new ParseFile("photo.png", Utils.uriToBytes(this, uri));
+
+            orderObject.put("photo",file);
+        }
+
         orderObject.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                if(e == null){
+                if (e == null) {
                     Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
-                }else{
+                } else {
                     Toast.makeText(MainActivity.this, "Submit Fail", Toast.LENGTH_LONG).show();
+                    hasPhoto = false;
+                    photoView.setImageResource(0);
+
+                    editText.setText("");
+                    textView.setText("");
+                    setHistory();
                 }
             }
         });
 
-        Utils.writeFile(this, "history.txt", text + '\n');
+//        Utils.writeFile(this, "history.txt", text + '\n');
 
 
-        if (hideCheckBox.isChecked())
-        {
-            Toast.makeText(this,text,Toast.LENGTH_LONG).show();
-            textView.setText("**********");
-            editText.setText("**********");
-            return;
-        }
-        editText.setText("");
-        textView.setText(text);
+
+
+//        if (hideCheckBox.isChecked())
+//        {
+//            Toast.makeText(this,text,Toast.LENGTH_LONG).show();
+//            textView.setText("**********");
+//            editText.setText("**********");
+//            return;
+//        }
+//        editText.setText("");
+//        textView.setText(text);
 
     }
 
@@ -342,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }else if(requestCode == REQUEST_CODE_CAMERA){
             if(resultCode == RESULT_OK){
+                this.hasPhoto = true;
 //                Log.d("Camera Result:", "OK1");
                 photoView.setImageURI(Utils.getPhotoUri());
 //                Log.d("Camera Result:", "OK2");
@@ -435,11 +463,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToCamera(){
-//        if(Build.VERSION.SDK_INT >= 23){
-//            if(this.checkSelfPermission(Manifest.permision.WRITE_EXTERNAL_STORAGE != PackageManager.PERMISSION_GRANTED)){
-//                requestPermissions(new String[]{Manifest.});
+        if(Build.VERSION.SDK_INT >= 23){
+            //方法一：
+//            if(this.checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED){
+//                requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 0);
+//                return;
 //            }
-//        }
+
+            //方法二：
+            if(this.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                return;
+            }
+        }
         Intent intent = new Intent();
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Utils.getPhotoUri());

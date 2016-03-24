@@ -14,8 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class DrinkMenuAvtivity extends AppCompatActivity {
-    private int drinkNumber;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("debug", "drink menu onCreate");
