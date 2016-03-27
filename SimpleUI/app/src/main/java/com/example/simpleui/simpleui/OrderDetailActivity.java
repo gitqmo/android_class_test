@@ -1,5 +1,6 @@
 package com.example.simpleui.simpleui;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -11,7 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class OrderDetailActivity extends AppCompatActivity {
+public class OrderDetailActivity extends LogTraceActivity {
     TextView note, storeInfo, menu;
     ImageView photo;
     String menuResult;
@@ -33,6 +34,8 @@ public class OrderDetailActivity extends AppCompatActivity {
         JSONArray array;
         String text = "";
         String name, lNumber, mNumber;
+
+        //取lNumber、mNumber的訂單
         try {
             array = new JSONArray(menuResult);
             for(int i=0; i<array.length(); i++){
@@ -43,12 +46,11 @@ public class OrderDetailActivity extends AppCompatActivity {
 
                 text += name+ "大杯："+ lNumber+ "、中杯："+ mNumber+ "\n";
             }
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
+        //取l、m的訂單
         try {
 
             array = new JSONArray(menuResult);
@@ -63,6 +65,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         this.menu.setText(text);
 
         String url = this.getIntent().getStringExtra("photoURL");
@@ -70,9 +73,11 @@ public class OrderDetailActivity extends AppCompatActivity {
             Picasso.with(this).load(url).into(photo);
         }
 
-//
-
 //        this.menu.setText(this.getIntent().getStringExtra("menu"));
 //        this.note.setText(this.getIntent().getStringExtra("note"));
+    }
+
+    private void getOrder(Intent intent){
+
     }
 }

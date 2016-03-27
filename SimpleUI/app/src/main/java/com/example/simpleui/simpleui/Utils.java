@@ -16,52 +16,60 @@ import java.io.InputStream;
  * Created by new on 2016/3/10.
  */
 public class Utils {
-    public static void writeFile(Context context, String fileName, String content){
-        try{
-            FileOutputStream fos = context.openFileOutput(fileName, Context.MODE_APPEND);
-            fos.write(content.getBytes());
-            fos.close();
-        }catch (FileNotFoundException e){
+    public static void writeFile(Context context, String fileName, String content) {
+        FileOutputStream fileOutputStream;
+        try {
+            fileOutputStream = context.openFileOutput(fileName, Context.MODE_APPEND);
+            fileOutputStream.write(content.getBytes());
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static String readFile(Context context, String fileName){
-        try{
-            FileInputStream fis = context.openFileInput(fileName);
+    public static String readFile(Context context, String fileName) {
+        FileInputStream fileInputStream;
+        try {
+            fileInputStream = context.openFileInput(fileName);
             byte[] buffer = new byte[1024];
-            fis.read(buffer, 0, buffer.length);
-            fis.close();
+            fileInputStream.read(buffer, 0, buffer.length);
+            fileInputStream.close();
             return new String(buffer);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return "";
     }
 
-    public static Uri getPhotoUri(){
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+    public static Uri getPhotoUri() {
+        File dir, file;
 
-        if(dir.exists() == false){
+        dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        if (!dir.exists()) {
             dir.mkdir();
         }
 
-        File file = new File(dir, "simple_photo.png");
+        file = new File(dir, "simple_photo.png");
+
         return Uri.fromFile(file);
     }
 
-    public static byte[] uriToBytes(Context context, Uri uri){
-        try{
-            InputStream inputStream = context.getContentResolver().openInputStream(uri);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    public static byte[] uriToBytes(Context context, Uri uri) {
+        InputStream inputStream;
+        ByteArrayOutputStream byteArrayOutputStream;
+
+        try {
+            inputStream = context.getContentResolver().openInputStream(uri);
+            byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length = 0;
 
-            while((length = inputStream.read(buffer)) != -1){
+            while ((length = inputStream.read(buffer)) != -1) {
                 byteArrayOutputStream.write(buffer, 0, length);
             }
 
