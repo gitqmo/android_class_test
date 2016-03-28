@@ -7,7 +7,7 @@ import com.parse.Parse;
 /**
  * Created by new on 2016/3/21.
  */
-public class SimpleUIApplication extends Application{
+public class SimpleUIApplication extends Application {
 
     @Override
     public void onCreate() {

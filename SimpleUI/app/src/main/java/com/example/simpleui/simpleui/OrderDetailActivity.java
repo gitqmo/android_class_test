@@ -1,7 +1,6 @@
 package com.example.simpleui.simpleui;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,13 +37,13 @@ public class OrderDetailActivity extends LogTraceActivity {
         //取lNumber、mNumber的訂單
         try {
             array = new JSONArray(menuResult);
-            for(int i=0; i<array.length(); i++){
+            for (int i = 0; i < array.length(); i++) {
                 JSONObject order = array.getJSONObject(i);
                 name = order.getString("name");
                 lNumber = String.valueOf(order.getString("lNumber"));
                 mNumber = String.valueOf(order.getString("mNumber"));
 
-                text += name+ "大杯："+ lNumber+ "、中杯："+ mNumber+ "\n";
+                text += name + "大杯：" + lNumber + "、中杯：" + mNumber + "\n";
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -54,13 +53,13 @@ public class OrderDetailActivity extends LogTraceActivity {
         try {
 
             array = new JSONArray(menuResult);
-            for(int i=0; i<array.length(); i++){
+            for (int i = 0; i < array.length(); i++) {
                 JSONObject order = array.getJSONObject(i);
                 name = order.getString("name");
                 lNumber = String.valueOf(order.getString("l"));
                 mNumber = String.valueOf(order.getString("m"));
 
-                text += name+ "大杯："+ lNumber+ "、中杯："+ mNumber+ "\n";
+                text += name + "大杯：" + lNumber + "、中杯：" + mNumber + "\n";
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -69,7 +68,7 @@ public class OrderDetailActivity extends LogTraceActivity {
         this.menu.setText(text);
 
         String url = this.getIntent().getStringExtra("photoURL");
-        if(url != null){
+        if (url != null) {
             Picasso.with(this).load(url).into(photo);
         }
 
@@ -77,7 +76,7 @@ public class OrderDetailActivity extends LogTraceActivity {
 //        this.note.setText(this.getIntent().getStringExtra("note"));
     }
 
-    private void getOrder(Intent intent){
+    private void getOrder(Intent intent) {
 
     }
 }

@@ -71,7 +71,6 @@ public class MainActivity extends LogTraceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("LogTrace", "main menu onCreate");
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
 
@@ -396,7 +395,7 @@ public class MainActivity extends LogTraceActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("LogTrace", this.getClass().toString() + ":onActivityResult()");
+        Log.d("LogTrace", this.getLocalClassName() + ":onActivityResult()");
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_MENU_ACTIVITY) {
@@ -465,14 +464,14 @@ public class MainActivity extends LogTraceActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d("LogTrace", this.getClass().toString() + ":onCreateOptionsMenu()");
+        Log.d("LogTrace", this.getLocalClassName() + ":onCreateOptionsMenu()");
         this.getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d("LogTrace", this.getClass().toString() + ":onOptionsItemSelected()");
+        Log.d("LogTrace", this.getLocalClassName() + ":onOptionsItemSelected()");
         int id = item.getItemId();
 
         if (id == R.id.action_take_photo) {

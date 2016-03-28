@@ -41,12 +41,12 @@ public class Test {
     /**
      * 簡單應用Spinner(店家資訊在array.xml中定義)
      */
-    public static void testSetSpinner(Context context, Spinner spinner){
+    public static void testSetSpinner(Context context, Spinner spinner) {
         String[] data;
         ArrayAdapter<String> adapter;
         //String[] data = {"1","2","3","4","5"};
 
-        data= context.getResources().getStringArray(R.array.storeInfo);
+        data = context.getResources().getStringArray(R.array.storeInfo);
         adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, data);
         spinner.setAdapter(adapter);
     }
@@ -54,7 +54,7 @@ public class Test {
     /**
      * 簡單從sharedPreferences中讀取資料顯示到TextView上
      */
-    public static void testSetListView(Context context, ListView listView){
+    public static void testSetListView(Context context, ListView listView) {
         String[] data;
         ArrayAdapter<String> adapter;
 
@@ -65,26 +65,27 @@ public class Test {
 
     /**
      * 簡單把傳入的文字儲存到指定檔案中。
+     *
      * @param context
      * @param text
      */
-    public static void saveData(Context context, String text){
+    public static void saveData(Context context, String text) {
         Utils.writeFile(context, "history.txt", text + '\n');
     }
 
     /**
      * 依據checkBox值來決定是否隱藏資訊
+     *
      * @param context
      * @param textView
      * @param editText
      * @param checkBox
      */
     public static void submitByCheckbox(Context context,
-                                       TextView textView,
-                                       EditText editText,
-                                       CheckBox checkBox){
-        if (checkBox.isChecked())
-        {
+                                        TextView textView,
+                                        EditText editText,
+                                        CheckBox checkBox) {
+        if (checkBox.isChecked()) {
             Toast.makeText(context, editText.getText().toString(), Toast.LENGTH_LONG).show();
             textView.setText("**********");
             editText.setText("**********");

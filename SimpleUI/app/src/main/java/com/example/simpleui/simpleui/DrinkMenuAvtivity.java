@@ -2,7 +2,6 @@ package com.example.simpleui.simpleui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 public class DrinkMenuAvtivity extends LogTraceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("LogTrace", this.getClass().toString() + ":onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drink_menu_avtivity);
     }
@@ -44,6 +42,7 @@ public class DrinkMenuAvtivity extends LogTraceActivity {
 
     /**
      * 從選單頁面讀取訂單資訊，並以JSONArray的格式回傳
+     *
      * @return
      */
     public JSONArray getOrderData() {
@@ -76,6 +75,7 @@ public class DrinkMenuAvtivity extends LogTraceActivity {
 
     /**
      * 把資料存入到JSONObject
+     *
      * @param nameKey
      * @param name
      * @param lNumberKey
