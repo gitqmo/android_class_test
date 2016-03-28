@@ -212,7 +212,10 @@ public class MainActivity extends LogTraceActivity {
                     menu = null;
 //                    menu = object.getString("menu");
                     try {
-                        menu = Integer.toString(countTotalCupsInHistory(new JSONArray(object.getString("menu"))));
+//                        String temp = object.getString("menu");
+//                        JSONArray jsonArray = new JSONArray(temp);
+//                        int test = countTotalCupsInHistory(jsonArray);
+                        menu = String.valueOf(countTotalCupsInHistory(new JSONArray(object.getString("menu"))));
                     } catch (JSONException e1) {
                         e1.printStackTrace();
                     }
@@ -362,6 +365,7 @@ public class MainActivity extends LogTraceActivity {
                     Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
                     hasPhoto = false;
                     photoView.setImageResource(0);
+//                    photoView.setImageDrawable(null);
 
                     editText.setText("");
                     textView.setText("");
