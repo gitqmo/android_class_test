@@ -1,7 +1,6 @@
 package com.example.simpleui.simpleui;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -10,44 +9,44 @@ import android.util.Log;
  */
 public class LogTraceActivity extends AppCompatActivity {
     @Override
-    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        Log.d("LogTrace", this.getClass().toString() + ":onCreate()");
-        super.onCreate(savedInstanceState, persistentState);
-    }
-
-    @Override
-    protected void onStart() {
-        Log.d("LogTrace", this.getClass().toString() + ":onStart()");
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        Log.d("LogTrace", this.getClass().toString() + ":onResume()");
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        Log.d("LogTrace", this.getClass().toString() + ":onPause()");
-        super.onPause();
+    protected void onCreate(Bundle savedInstanceState) {
+        Log.d("LogTrace", this.getLocalClassName() + ":onCreate()");
+        super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onStop() {
-        Log.d("LogTrace", this.getClass().toString() + ":onStop()");
+        Log.d("LogTrace", this.getLocalClassName() + ":onStop()");
         super.onStop();
     }
 
     @Override
+    protected void onDestroy() {
+        Log.d("LogTrace", this.getLocalClassName() + ":onDestroy()");
+        super.onDestroy();
+    }
+
+    @Override
     protected void onRestart() {
-        Log.d("LogTrace", this.getClass().toString() + ":onRestart()");
+        Log.d("LogTrace", this.getLocalClassName() + ":onRestart()");
         super.onRestart();
     }
 
     @Override
-    protected void onDestroy() {
-        Log.d("LogTrace", this.getClass().toString() + ":onDestroy()");
-        super.onDestroy();
+    protected void onPause() {
+        Log.d("LogTrace", this.getLocalClassName() + ":onPause()");
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("LogTrace", this.getLocalClassName() + ":onResume()");
+        super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d("LogTrace", this.getLocalClassName() + ":onStart()");
+        super.onStart();
     }
 }
