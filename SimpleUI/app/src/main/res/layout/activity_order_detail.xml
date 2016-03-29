@@ -55,11 +55,18 @@
 
             </LinearLayout>
 
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/linearLayout"
+                android:text="New Switch"/>
+
             <ImageView
                 android:id="@+id/staticMapImageView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/linearLayout"/>
+                android:layout_below="@+id/switch1"/>
 
             <WebView
                 android:id="@+id/webView"

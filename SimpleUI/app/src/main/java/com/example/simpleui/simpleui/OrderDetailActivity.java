@@ -4,8 +4,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.webkit.WebView;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -14,14 +18,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 public class OrderDetailActivity extends LogTraceActivity {
-    private String url, address;
-
     private TextView note, storeInfo, menu;
     private ImageView photo;
     private String menuResult;
     private String storeInformation;
     private ImageView staticMapImageView;
     private WebView webView;
+    private Switch switch1;
+
+    private String url, address;
+    private boolean switchFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +35,7 @@ public class OrderDetailActivity extends LogTraceActivity {
         this.setContentView(R.layout.activity_order_detail);
 
         this.initial();
+        this.setListener();
 
         this.showOrderDetail();
         this.showPhoto();
@@ -45,12 +52,35 @@ public class OrderDetailActivity extends LogTraceActivity {
         this.photo = (ImageView) findViewById(R.id.photoView);
         this.staticMapImageView = (ImageView) findViewById(R.id.staticMapImageView);
         this.webView = (WebView) findViewById(R.id.webView);
+        this.switch1 = (Switch) findViewById(R.id.switch1);
 
         this.note.setText(this.getIntent().getStringExtra("note"));
         this.storeInfo.setText(this.getIntent().getStringExtra("storeInfo"));
         this.menuResult = this.getIntent().getStringExtra("menu");
 
-        this.storeInformation = this.storeInfo.getText().toString();
+        this.defaultSetting();
+    }
+
+    /**
+     * 設定Listener
+     */
+    private void setListener() {
+        this.switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    switchFlag = true;
+                    staticMapImageView.setVisibility(View.GONE);
+                    webView.setVisibility(View.VISIBLE);
+                    Log.d("LogTrace", "switchFlag:" + switchFlag);
+                } else {
+                    switchFlag = false;
+                    staticMapImageView.setVisibility(View.VISIBLE);
+                    webView.setVisibility(View.GONE);
+                    Log.d("LogTrace", "switchFlag:" + switchFlag);
+                }
+            }
+        });
     }
 
     /**
@@ -88,12 +118,27 @@ public class OrderDetailActivity extends LogTraceActivity {
      * 顯示Google Map
      */
     private void showGoogleMap() {
+        byte[] bytes;
+
+        bytes = null;
         this.address = storeInformation.split(",")[1];
+
         //方法一：使用Thread的方式來存取Google Map
 //        Test.getLatLngByThread(address);
 
         //方法二：使用Asynchronous Thread的方式來存取Google Map
         (new GeoCodingTask(this.staticMapImageView)).execute(this.address);
+    }
+
+    /**
+     * 初始設定值
+     */
+    private void defaultSetting() {
+        this.storeInformation = this.storeInfo.getText().toString();
+
+        this.switchFlag = false;
+        this.staticMapImageView.setVisibility(View.VISIBLE);
+        this.webView.setVisibility(View.GONE);
     }
 
     /**
@@ -118,8 +163,8 @@ public class OrderDetailActivity extends LogTraceActivity {
         }
 
         @Override
-        protected byte[] doInBackground(String... parms) {
-            String url = parms[0];
+        protected byte[] doInBackground(String... params) {
+            String url = params[0];
             return Utils.urlToBytes(url);
         }
 
@@ -142,8 +187,8 @@ public class OrderDetailActivity extends LogTraceActivity {
         }
 
         @Override
-        protected byte[] doInBackground(String... parms) {
-            String address = parms[0];
+        protected byte[] doInBackground(String... params) {
+            String address = params[0];
             double[] location = Utils.addressToLatLng(address);
             url = Utils.getStaticMapUrl(location, 17);
             return Utils.urlToBytes(url);
@@ -151,9 +196,17 @@ public class OrderDetailActivity extends LogTraceActivity {
 
         @Override
         protected void onPostExecute(byte[] bytes) {
+            Bitmap bitmap;
+
             webView.loadUrl(url);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             imageView.setImageBitmap(bitmap);
+
+//            if(switchFlag){
+//                webView.setVisibility(View.GONE);
+//            }else{
+//                imageView.setImageResource(0);
+//            }
             super.onPostExecute(bytes);
         }
     }
