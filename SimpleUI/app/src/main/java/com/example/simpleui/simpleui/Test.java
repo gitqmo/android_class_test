@@ -1,10 +1,13 @@
 package com.example.simpleui.simpleui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -93,5 +96,60 @@ public class Test {
         }
         textView.setText(editText.getText().toString());
         editText.setText("");
+    }
+
+    /**
+     * 把傳入的地址參數用Thread的方式去取得經緯度，但有可能會發生問題，所以建議使用Asynchronous Thread的方式存取
+     *
+     * @param address
+     */
+    public static void testGetLatLngByThread(final String address) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                double[] locations = Utils.addressToLatLng(address);
+
+                if (locations == null) {
+                    Log.d("LogTrace", "locations is null");
+                } else {
+                    String latlng = "lat:" + String.valueOf(locations[0])
+                            + " lng:" + String.valueOf(locations[1]);
+                    Log.d("LogTrace", latlng);
+                }
+            }
+        });
+        thread.start();
+    }
+
+    /**
+     * 把傳入的指定位址的圖片顯示出來
+     *
+     * @param imageView
+     * @param url
+     */
+    public static void testGetImage(ImageView imageView, String url) {
+        (new TempThread(imageView, url)).start();
+    }
+
+    /**
+     * 配合testGetImage的測試使用
+     */
+    private static class TempThread extends Thread {
+        ImageView imageView;
+        String url;
+
+        public TempThread(ImageView imageView, String url) {
+            this.imageView = imageView;
+            this.url = url;
+        }
+
+        @Override
+        public void run() {
+            byte[] bytes = Utils.urlToBytes(url);
+            String result = new String(bytes);
+            Log.d("LogTrace", "URL：" + result);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            imageView.setImageBitmap(bitmap);
+        }
     }
 }

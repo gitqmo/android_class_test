@@ -41,7 +41,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 //import java.util.jar.Manifest;
@@ -121,20 +120,6 @@ public class MainActivity extends LogTraceActivity {
     }
 
     /**
-     * 從sharedPreferences中先前所暫存的資料，回復到畫面中
-     */
-    private void restoreData() {
-        // 取出sharedPreferences裡面editText的內容，存回到editText
-        this.editText.setText(this.sharedPreferences.getString("editText", ""));
-
-        /*
-         * 抓取畫面上hidecheckbox物件的值(如果有被勾選就帶入true，如果沒有勾選就是預設為false)，
-         * 再存回sharedPreferences裡面的hidecheckbox
-         */
-        this.hideCheckBox.setChecked(sharedPreferences.getBoolean("hideCheckbox", false));
-    }
-
-    /**
      * 設定Listener
      */
     private void setListener() {
@@ -182,6 +167,50 @@ public class MainActivity extends LogTraceActivity {
         });
     }
 
+    /**
+     * 從sharedPreferences中先前所暫存的資料，回復到畫面中
+     */
+    private void restoreData() {
+        // 取出sharedPreferences裡面editText的內容，存回到editText
+        this.editText.setText(this.sharedPreferences.getString("editText", ""));
+
+        /*
+         * 抓取畫面上hidecheckbox物件的值(如果有被勾選就帶入true，如果沒有勾選就是預設為false)，
+         * 再存回sharedPreferences裡面的hidecheckbox
+         */
+        this.hideCheckBox.setChecked(sharedPreferences.getBoolean("hideCheckbox", false));
+    }
+
+    /**
+     * 從先前的thread中，取出符合【StoreInfo】的ParseQuery，並把值填入下拉式選單中(spinner)
+     */
+    private void setStoreInfos() {
+        ParseQuery<ParseObject> query = new ParseQuery<>("StoreInfo");
+
+        // Retrieves a list of ParseObjects that satisfy this query from the source in a background thread.
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e != null) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                String[] stores = new String[list.size()];
+                for (int i = 0; i < list.size(); i++) {
+                    ParseObject object = list.get(i);
+                    stores[i] = object.getString("name") + ", " + object.getString("address");
+                }
+
+                ArrayAdapter<String> storeAdapter = new ArrayAdapter<>(
+                        MainActivity.this,
+                        android.R.layout.simple_list_item_1,
+                        stores);
+
+                spinner.setAdapter(storeAdapter);
+            }
+        });
+    }
 
     private void setHistoryList() {
         ParseQuery<ParseObject> query;
@@ -215,7 +244,7 @@ public class MainActivity extends LogTraceActivity {
 //                        String temp = object.getString("menu");
 //                        JSONArray jsonArray = new JSONArray(temp);
 //                        int test = countTotalCupsInHistory(jsonArray);
-                        menu = String.valueOf(countTotalCupsInHistory(new JSONArray(object.getString("menu"))));
+                        menu = String.valueOf(Utils.countTotalCupsInHistory(new JSONArray(object.getString("menu"))));
                     } catch (JSONException e1) {
                         e1.printStackTrace();
                     }
@@ -242,82 +271,25 @@ public class MainActivity extends LogTraceActivity {
     }
 
     /**
-     * 統計歷次訂單的杯數
+     * 顯示歷史選單的訂單資訊
      *
-     * @param jsonArray
-     * @return
+     * @param posotion
      */
-    private int countTotalCupsInHistory(JSONArray jsonArray) {
-        int total;
+    private void goToDetailOrder(int posotion) {
+        Intent intent = new Intent();
+        ParseObject object = queryResults.get(posotion);
 
-        total = 0;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            try {
-                total += this.countTotalCupsPerOrder(jsonArray.getJSONObject(i));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        intent.setClass(this, OrderDetailActivity.class);
+
+        intent.putExtra("note", object.getString("note"));
+        intent.putExtra("storeInfo", object.getString("storeInfo"));
+        intent.putExtra("menu", object.getString("menu"));
+
+        if (object.getParseFile("photo") != null) {
+            intent.putExtra("photoURL", object.getParseFile("photo").getUrl());
         }
-        return total;
-    }
 
-    /**
-     * 統計每筆訂單的總數
-     *
-     * @param jsonObject
-     * @return
-     */
-    private int countTotalCupsPerOrder(JSONObject jsonObject) {
-        int total;
-
-        total = 0;
-        Iterator<String> key;
-        try {
-            key = jsonObject.keys();
-
-            while (key.hasNext()) {
-                String tempKey;
-
-                tempKey = key.next();
-                if (!tempKey.equals("name")) {
-                    total += jsonObject.getInt(tempKey);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return total;
-    }
-
-    /**
-     * 從先前的thread中，取出符合【StoreInfo】的ParseQuery，並把值填入下拉式選單中(spinner)
-     */
-    private void setStoreInfos() {
-        ParseQuery<ParseObject> query = new ParseQuery<>("StoreInfo");
-
-        // Retrieves a list of ParseObjects that satisfy this query from the source in a background thread.
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e != null) {
-                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                String[] stores = new String[list.size()];
-                for (int i = 0; i < list.size(); i++) {
-                    ParseObject object = list.get(i);
-                    stores[i] = object.getString("name") + ", " + object.getString("address");
-                }
-
-                ArrayAdapter<String> storeAdapter = new ArrayAdapter<>(
-                        MainActivity.this,
-                        android.R.layout.simple_list_item_1,
-                        stores);
-
-                spinner.setAdapter(storeAdapter);
-            }
-        });
+        startActivity(intent);
     }
 
     public void submit(View view) {
@@ -442,28 +414,6 @@ public class MainActivity extends LogTraceActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 顯示歷史選單的訂單資訊
-     *
-     * @param posotion
-     */
-    private void goToDetailOrder(int posotion) {
-        Intent intent = new Intent();
-        ParseObject object = queryResults.get(posotion);
-
-        intent.setClass(this, OrderDetailActivity.class);
-
-        intent.putExtra("note", object.getString("note"));
-        intent.putExtra("storeInfo", object.getString("storeInfo"));
-        intent.putExtra("menu", object.getString("menu"));
-
-        if (object.getParseFile("photo") != null) {
-            intent.putExtra("photoURL", object.getParseFile("photo").getUrl());
-        }
-
-        startActivity(intent);
     }
 
     @Override
