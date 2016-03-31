@@ -22,6 +22,11 @@
             android:name="com.parse.CLIENT_KEY"
             android:value="DnZ3ggXI55eF8ypD5bps3eBYQ0qAFCHehre5Wu6a" />
 
+        <!-- Google Map API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBNeAGBKotp0gXAApRJiw4SUqRF45Bzy1c"/>
+
         <!-- 作業Parse的Key -->
         <!--
         <meta-data

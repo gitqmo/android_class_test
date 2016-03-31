@@ -4,14 +4,21 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -25,9 +32,10 @@ public class OrderDetailActivity extends LogTraceActivity {
     private ImageView staticMapImageView;
     private WebView webView;
     private Switch switch1;
+    private MapFragment mapFragment;
+    private GoogleMap map;
 
-    private String url, address;
-    private boolean switchFlag;
+    private String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,7 @@ public class OrderDetailActivity extends LogTraceActivity {
         this.setContentView(R.layout.activity_order_detail);
 
         this.initial();
+        this.defaultSetting();
         this.setListener();
 
         this.showOrderDetail();
@@ -53,12 +62,27 @@ public class OrderDetailActivity extends LogTraceActivity {
         this.staticMapImageView = (ImageView) findViewById(R.id.staticMapImageView);
         this.webView = (WebView) findViewById(R.id.webView);
         this.switch1 = (Switch) findViewById(R.id.switch1);
+        this.mapFragment = (MapFragment) this.getFragmentManager().findFragmentById(R.id.mapFragment);
 
         this.note.setText(this.getIntent().getStringExtra("note"));
         this.storeInfo.setText(this.getIntent().getStringExtra("storeInfo"));
         this.menuResult = this.getIntent().getStringExtra("menu");
+    }
 
-        this.defaultSetting();
+    /**
+     * 初始設定值
+     */
+    private void defaultSetting() {
+        this.storeInformation = this.storeInfo.getText().toString();
+        this.mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                map = googleMap;
+            }
+        });
+
+        this.staticMapImageView.setVisibility(View.VISIBLE);
+        this.webView.setVisibility(View.GONE);
     }
 
     /**
@@ -69,15 +93,11 @@ public class OrderDetailActivity extends LogTraceActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    switchFlag = true;
                     staticMapImageView.setVisibility(View.GONE);
                     webView.setVisibility(View.VISIBLE);
-                    Log.d("LogTrace", "switchFlag:" + switchFlag);
                 } else {
-                    switchFlag = false;
                     staticMapImageView.setVisibility(View.VISIBLE);
                     webView.setVisibility(View.GONE);
-                    Log.d("LogTrace", "switchFlag:" + switchFlag);
                 }
             }
         });
@@ -99,8 +119,10 @@ public class OrderDetailActivity extends LogTraceActivity {
      * 顯示照片
      */
     private void showPhoto() {
-        this.url = this.getIntent().getStringExtra("photoURL");
-        if (this.url == null) {
+        String url;
+
+        url = this.getIntent().getStringExtra("photoURL");
+        if (url == null) {
             return;
         } else {
             //方法一：使用Picasso套件來顯示圖片
@@ -110,7 +132,7 @@ public class OrderDetailActivity extends LogTraceActivity {
 //        Test.testGetImage(photo, url);
 
             //方法三：使用Asynchronous Thread的方式來顯示圖片
-            (new ImageLoadingTask(this.photo)).execute(this.url);
+            (new ImageLoadingTask(this.photo)).execute(url);
         }
     }
 
@@ -128,17 +150,6 @@ public class OrderDetailActivity extends LogTraceActivity {
 
         //方法二：使用Asynchronous Thread的方式來存取Google Map
         (new GeoCodingTask(this.staticMapImageView)).execute(this.address);
-    }
-
-    /**
-     * 初始設定值
-     */
-    private void defaultSetting() {
-        this.storeInformation = this.storeInfo.getText().toString();
-
-        this.switchFlag = false;
-        this.staticMapImageView.setVisibility(View.VISIBLE);
-        this.webView.setVisibility(View.GONE);
     }
 
     /**
@@ -182,6 +193,9 @@ public class OrderDetailActivity extends LogTraceActivity {
     class GeoCodingTask extends AsyncTask<String, Void, byte[]> {
         ImageView imageView;
 
+        private String url;
+        private double[] latLng;
+
         public GeoCodingTask(ImageView imageView) {
             this.imageView = imageView;
         }
@@ -189,8 +203,8 @@ public class OrderDetailActivity extends LogTraceActivity {
         @Override
         protected byte[] doInBackground(String... params) {
             String address = params[0];
-            double[] location = Utils.addressToLatLng(address);
-            url = Utils.getStaticMapUrl(location, 17);
+            latLng = Utils.addressToLatLng(address);
+            url = Utils.getStaticMapUrl(latLng, 17);
             return Utils.urlToBytes(url);
         }
 
@@ -207,6 +221,25 @@ public class OrderDetailActivity extends LogTraceActivity {
 //            }else{
 //                imageView.setImageResource(0);
 //            }
+
+            LatLng location = new LatLng(latLng[0], latLng[1]);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 17));
+
+            String[] storeInfos = getIntent().getStringExtra("storeInfo").split(",");
+            map.addMarker(new MarkerOptions()
+                    .title(storeInfos[0])
+                    .snippet(storeInfos[1])
+                    .position(location));
+
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    Toast.makeText(OrderDetailActivity.this, marker.getTitle(), Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            });
+
+
             super.onPostExecute(bytes);
         }
     }
