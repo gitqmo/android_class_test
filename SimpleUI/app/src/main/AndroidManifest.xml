@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.simpleui.simpleui">
 
+    <!-- Internet 的權限-->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -27,6 +29,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBNeAGBKotp0gXAApRJiw4SUqRF45Bzy1c"/>
 
+        <!-- Facebook API Key -->
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
         <!-- 作業Parse的Key -->
         <!--
         <meta-data
@@ -45,7 +50,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".DrinkMenuAvtivity" />
-        <activity android:name=".OrderDetailActivity"></activity>
+        <activity android:name=".OrderDetailActivity"/>
+
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
     </application>
 
 </manifest>
