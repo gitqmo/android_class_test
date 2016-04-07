@@ -12,13 +12,13 @@
     <com.facebook.login.widget.LoginButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/facebookView"/>
+        android:id="@+id/loginButton"/>
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/facebookView"
+        android:layout_below="@+id/loginButton"
         android:text="Hello World!"/>
 
 

@@ -28,7 +28,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -59,6 +68,7 @@ public class MainActivity extends LogTraceActivity {
     private ImageView photoView;
     private ProgressDialog progressDialog;
     private ProgressBar progressBar;
+    private LoginButton loginButton;
     //暫存資料變數宣告
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -67,7 +77,9 @@ public class MainActivity extends LogTraceActivity {
     private boolean hasPhoto;               // 儲存是否有照片存在
     private String menuResult;              // 儲存一筆訂單全部資訊
     private List<ParseObject> queryResults; // 儲存歷史訂單資訊
-
+    private CallbackManager callbackManager;
+    private AccessToken accessToken;
+    private AccessTokenTracker accessTokenTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +99,54 @@ public class MainActivity extends LogTraceActivity {
             Test.testSetListView(this, this.historyListView);
 //            Test.testParseServer();
         }
+
+        this.setupFacebook();
+    }
+
+    private void setupFacebook(){
+        this.callbackManager = CallbackManager.Factory.create();
+        this.loginButton.registerCallback(this.callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                GraphRequest graphRequest;
+
+                MainActivity.this.accessToken = loginResult.getAccessToken();
+                graphRequest = GraphRequest.newGraphPathRequest(
+                        accessToken, "/v2.5/me", new GraphRequest.Callback() {
+                            @Override
+                            public void onCompleted(GraphResponse response) {
+                                JSONObject jsonObject = response.getJSONObject();
+                                try {
+                                    String name = jsonObject.getString("name");
+                                    Toast.makeText(MainActivity.this, "Hello " + name, Toast.LENGTH_LONG).show();
+                                    textView.setText("Hello " + name);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                graphRequest.executeAsync();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
+        this.accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                if(currentAccessToken == null){
+                    textView.setText("Hello World");
+                }
+            }
+        };
     }
 
     /**
@@ -113,11 +173,14 @@ public class MainActivity extends LogTraceActivity {
         this.progressBar = (ProgressBar) findViewById(R.id.progressBar);
         this.progressBar.setVisibility(View.GONE);
 
+        this.loginButton = (LoginButton) findViewById(R.id.loginButton);
+
         this.sharedPreferences = this.getSharedPreferences("setting", Context.MODE_PRIVATE); // 定義setting裡面的東西，供之後使用
         this.editor = this.sharedPreferences.edit();
 
         this.hasPhoto = false;
         this.menuResult = "";
+
     }
 
     /**
@@ -372,7 +435,6 @@ public class MainActivity extends LogTraceActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("LogTrace", this.getLocalClassName() + ":onActivityResult()");
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_MENU_ACTIVITY) {
@@ -386,6 +448,8 @@ public class MainActivity extends LogTraceActivity {
                 photoView.setImageURI(Utils.getPhotoUri());
             }
         }
+
+        MainActivity.this.callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
